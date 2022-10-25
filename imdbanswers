@@ -728,7 +728,15 @@ Now, you will perform some tasks that will give you a broader understanding of t
 
 
 
-
+SELECT `g`.`genre`,
+    ROUND(AVG(`m`.`duration`),2) AS avg_duration,
+    SUM(ROUND(AVG(`m`.`duration`),2)) OVER(ORDER BY `g`.`genre` ROWS UNBOUNDED PRECEDING) AS running_total_duration,
+    AVG(ROUND(AVG(`m`.`duration`),2)) OVER(ORDER BY `g`.`genre` ROWS 10 PRECEDING) AS moving_avg_duration
+FROM movie AS m 
+INNER JOIN genre AS g 
+ON m.id= g.movie_id
+GROUP BY `g`.`genre`
+ORDER BY `g`.`genre`;
 
 
 
@@ -756,7 +764,33 @@ Now, you will perform some tasks that will give you a broader understanding of t
 -- Top 3 Genres based on most number of movies
 
 
+WITH top_3_genre AS
+( 	
+	SELECT `g`.`genre`, COUNT(`movie_id`) AS number_of_movies
+    FROM `genre` AS g
+    INNER JOIN `movie` AS m
+    ON `g`.`movie_id` = `m`.`id`
+    GROUP BY `g`.`genre`
+    ORDER BY COUNT(`movie_id`) DESC
+    LIMIT 3
+),
 
+top_5 AS
+(
+	SELECT `g`.`genre`,`m`.`year`,
+			`m`.`title` AS movie_name,
+			`m`.`worlwide_gross_income`,
+			DENSE_RANK() OVER(PARTITION BY `m`.`year` ORDER BY `m`.`worlwide_gross_income` DESC) AS movie_rank
+        
+	FROM `movie` AS m 
+    INNER JOIN `genre` AS g 
+    ON `g`.`movie_id` =`m`.`id`
+	WHERE `g`.`genre` IN (SELECT genre FROM top_3_genre)
+)
+
+SELECT *
+FROM `top_5`
+WHERE `movie_rank` <= 5;
 
 
 
