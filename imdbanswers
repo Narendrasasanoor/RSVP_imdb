@@ -550,7 +550,21 @@ Now, let’s find out the top two actors.*/
 +---------------+-------------------+ */
 -- Type your code below:
 
-
+SELECT DISTINCT
+    `n`.`name` AS actor_name,
+    COUNT(`r`.`movie_id`) AS movie_count
+FROM
+    `ratings` AS r
+        INNER JOIN
+    `role_mapping` AS rm ON `rm`.`movie_id` = `r`.`movie_id`
+        INNER JOIN
+    `names` AS n ON `rm`.`name_id` = `n`.`id`
+WHERE
+    `median_rating` >= 8
+        AND `category` = 'actor'
+GROUP BY `n`.`name`
+ORDER BY `movie_count` DESC
+LIMIT 2;
 
 
 
