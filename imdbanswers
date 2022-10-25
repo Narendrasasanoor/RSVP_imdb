@@ -685,7 +685,24 @@ Now let us divide all the thriller movies in the following categories and find o
 
 
 
-
+SELECT 
+    `m`.`title` AS 'Movie',
+    `m`.`languages`,
+    CASE
+        WHEN `r`.`avg_rating` > 8 THEN 'Superhit movies'
+        WHEN `r`.`avg_rating` BETWEEN 7 AND 8 THEN 'Hit movies'
+        WHEN `r`.`avg_rating` BETWEEN 5 AND 7 THEN 'One-time-watch movies'
+        ELSE 'Flop movies'
+    END AS 'Review',
+    `r`.`avg_rating` AS 'Rating'
+FROM
+    `movie` AS m
+        INNER JOIN
+    `genre` AS g ON `g`.`movie_id` = `m`.`id`
+        INNER JOIN
+    `ratings` AS r ON `r`.`movie_id` = `m`.`id`
+WHERE
+    `g`.`genre` = 'Thriller';
 
 
 
