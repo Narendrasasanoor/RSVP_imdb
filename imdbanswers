@@ -497,9 +497,40 @@ Let’s find out the top three directors in the top three genres who can be hire
 +---------------+-------------------+ */
 -- Type your code below:
 
-
-
-
+WITH top_three_genre AS (
+  SELECT 
+    `genre`, 
+    COUNT(`m`.`id`) AS movie_count, 
+    RANK() OVER(
+      ORDER BY 
+        COUNT(`m`.`id`) DESC
+    ) AS genre_rank 
+  FROM 
+    `movie` AS m 
+    INNER JOIN `genre` AS g ON `g`.`movie_id` = `m`.`id` 
+    INNER JOIN `ratings` AS r ON `r`.`movie_id` = `m`.`id` 
+  WHERE 
+    `avg_rating` > 8 
+  GROUP BY 
+    `genre` 
+  limit 3
+) 
+SELECT 
+  n.name AS director_name, 
+  COUNT(d.movie_id) AS movie_count 
+FROM 
+  `director_mapping` AS d 
+  INNER JOIN `genre` g using (`movie_id`) 
+  INNER JOIN `names` AS n ON `n`.`id` = `d`.`name_id` 
+  INNER JOIN `top_three_genre` using (`genre`) 
+  INNER JOIN `ratings` using (`movie_id`) 
+WHERE 
+  `avg_rating` > 8 
+GROUP BY 
+  `name` 
+ORDER BY 
+  `movie_count` DESC 
+limit 3;
 
 
 
