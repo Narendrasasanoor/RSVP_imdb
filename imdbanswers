@@ -587,11 +587,13 @@ Let’s find out the top three production houses in the world.*/
 -- Type your code below:
 
 
-
-
-
-
-
+SELECT `m`.`production_company`, SUM(`r`.`total_votes`) AS vote_count,
+		DENSE_RANK() OVER(ORDER BY SUM(`r`.`total_votes`) DESC) AS prod_comp_rank
+FROM `movie` AS m
+INNER JOIN `ratings` AS r
+ON `m`.`id` = `r`.`movie_id`
+GROUP BY `m`.`production_company`
+LIMIT 3;
 
 
 
@@ -619,7 +621,26 @@ Let’s find who these actors could be.*/
 
 
 
-
+SELECT 
+    `name` AS actor_name,
+    `r`.`total_votes`,
+    COUNT(`m`.`id`) AS movie_count,
+    ROUND(SUM(`r`.`avg_rating` * `r`.`total_votes`) / SUM(`r`.`total_votes`),
+            2) AS actor_avg_rating,
+    RANK() OVER(ORDER BY `avg_rating` DESC) AS actor_rank
+FROM
+    movie AS m
+        INNER JOIN
+    ratings AS r ON `m`.`id` = `r`.`movie_id`
+        INNER JOIN
+    role_mapping AS `r_m` ON `m`.`id` = `r_m`.`movie_id`
+        INNER JOIN
+    names AS n ON `r_m`.`name_id` = n.`id`
+WHERE
+    `r_m`.`category` = 'actor' AND m.country = 'India'
+GROUP BY `n`.`name`
+HAVING COUNT(`m`.`id`) >= 5
+LIMIT 1;
 
 
 
