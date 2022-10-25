@@ -834,6 +834,20 @@ WHERE `movie_rank` <= 5;
 
 
 
+SELECT `n`.`name`, SUM(`r`.`total_votes`) AS total_votes,
+		COUNT(`rm`.`movie_id`) AS movie_count,
+		`r`.`avg_rating`,
+        DENSE_RANK() OVER(ORDER BY `r`.`avg_rating` DESC) AS actress_rank
+FROM names AS n
+INNER JOIN role_mapping AS rm
+ON `n`.`id` = `rm`.`name_id`
+INNER JOIN ratings AS r
+ON `r`.`movie_id` = `rm`.`movie_id`
+INNER JOIN genre AS g
+ON `r`.`movie_id` = `g`.`movie_id`
+WHERE `rm`.`category` = 'actress' AND `g`.`genre` = 'Drama' AND `r`.`avg_rating` > 8
+GROUP BY `n`.`name`
+LIMIT 3;
 
 
 
