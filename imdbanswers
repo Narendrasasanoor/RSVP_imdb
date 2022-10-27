@@ -666,6 +666,35 @@ LIMIT 1;
 
 
 
+SELECT 
+  `nm`.`name` AS actress_name, 
+  `r`.`total_votes`, 
+  COUNT(m.id) AS movie_count, 
+  ROUND(
+    SUM(`r`.`avg_rating` * `r`.`total_votes`)/ SUM(`r`.`total_votes`), 
+    2
+  ) AS actress_avg_rating, 
+  RANK() OVER(
+    ORDER BY 
+      `r`.`avg_rating` DESC
+  ) AS actress_rank 
+FROM 
+  `movie` AS m 
+  INNER JOIN `ratings` AS r ON `m`.`id` = `r`.`movie_id` 
+  INNER JOIN `role_mapping` AS rm ON `m`.`id` = `rm`.`movie_id` 
+  INNER JOIN `names` AS nm ON `rm`.`name_id` = `nm`.`id` 
+WHERE 
+  `rm`.`category` = 'actress' 
+  AND `m`.`country` = 'India' 
+  AND `m`.`languages` = 'Hindi' 
+GROUP BY 
+  `nm`.`name` 
+HAVING 
+  COUNT(`m`.`id`) >= 3 
+LIMIT 
+  1;
+
+
 
 
 
